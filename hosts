@@ -1,0 +1,13 @@
+[test]
+
+#localhost ansible_connection=local
+vm1 ansible_host=127.0.0.1 ansible_port=60022 ansible_ssh_user=jimmy #anansible_password=1234 
+#ansible_connection=local
+[nontest]
+#10.125.24.55
+vm2 ansible_host=127.0.0.1 ansible_port=60023 ansible_ssh_user=jimmy 
+#m1 ansible_host=127.0.0.1 ansible_port=60022 ansible_user=jimmy
+#ansible_connection=local
+#localhost:60023 
+#ansible_connection=local
+

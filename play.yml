@@ -1,0 +1,223 @@
+---
+- name: Update web servers
+  hosts: test 
+  #remote_user: jimmy
+
+  tasks:
+    - name: ping tous
+      ansible.builtin.ping:
+
+    - name: Intaller nginx si besoin
+      pacman:
+        name: nginx
+        state: latest      
+      become: yes 
+      when: ansible_facts.services['nginx.service'] is not defined
+
+      #   - name: verif git 
+      #      ansible.builtin.package_facts:
+        #        manager: auto
+        #- name: ensure nginx is at the latest version
+      #pacman: name=nginx state=latest
+
+    
+      #ansible.builtin.service_facts:
+    - name: Start service nginx, if not started
+      become: yes
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        #ecome: yes
+        #service:
+        #name: nginx
+        #state: started
+        #when: ansible_facts.services['nginx.service'] is defined
+     
+
+
+    - name: enable nginx
+      become: yes
+      service:
+        name: nginx  
+        enabled: yes
+        #become: yes
+        #when: ansible_facts.services['nginx.service'] is defined
+
+      #- name: 1.2.3.4:80 -> web01:8080
+      #ansible.builtin.uri:      
+      #cs_portforward:
+        #ip_address: 127.0.0.1
+        #vm: web01
+        #public_port: 8098
+        #private_port: 80
+        #delegate_to: localhost
+        #- name: Forward port 80 to 8600
+      #ansible.builtin.iptables:
+        #table: nat
+        #chain: PREROUTING
+        #in_interface: ens3
+        #protocol: tcp
+        #match: tcp
+        #destination_port: 80
+        #jump: REDIRECT
+        #to_ports: 8600
+        #comment: Redirect web traffic to port 8600
+        #become: yes
+    - name: Allow connections on multiple ports
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_ports:
+          - "80"
+          - "443"
+          
+        jump: ACCEPT
+      become: yes
+
+
+    - name: source test git
+      ansible.builtin.package_facts:
+    - name: install git
+      become: yes
+      #become_user: root
+      pacman:
+        name: git
+        state: latest
+        #name: nginx
+        #state: latest
+      when: "'git' not in ansible_facts.packages"    
+
+    - name: Populate service facts
+      service_facts:
+    - debug:
+        msg: nginx installed!
+      when: ansible_facts.services['nginx.service'] is defined
+
+
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+# affiche tous les services présents###############
+#    - name: Print service facts
+#      ansible.builtin.debug:
+#          var: ansible_facts.services
+
+
+    - name: pre docker upgrade
+      become: yes
+      #become_user: jimmy
+      pacman:
+        update_cache: yes
+        upgrade: yes    
+        #- name: install docker     
+        #become: yes
+      #become_user: root
+      #pacman:  
+      #name: docker
+      #state: latest
+      #when: "'docker' not in ansible_facts.services"  
+
+        # - name: Start docker.service
+      #become: yes
+      #service:
+        #name: docker.service
+        #state: started
+        #enabled: true
+        #when: ansible_facts.services['docker.service'] is defined
+
+    - name: pre docker-docker upgrade
+      become: yes
+      #become_user: jimmy
+      pacman:
+        update_cache: yes
+        upgrade: yes    
+        #- name: install docker-compose     
+      #become: yes
+      #become_user: root
+      #pacman:  
+      #name: docker-compose
+      #state: latest
+      #when: "'docker-compose' not in ansible_facts.services"  
+
+     #- name: Start docker-compose.service
+      #become: yes
+      #service:
+        #name: docker-compose.service
+        #state: started
+        #enabled: true
+        #when: ansible_facts.services['docker-compose.service'] is defined
+    - name: ajout de setuptools
+      become: yes
+      pacman:
+        name:
+          - python-setuptools
+          - python-pip 
+          - docker
+        state: latest
+    - name: Install docker-py package on version 0.11
+      become: yes
+      ansible.builtin.pip:
+        name: 
+          - docker-compose 
+            
+        #- name: Install bottle python package on version 0.11
+      #ansible.builtin.pip:
+        #name: bottle==0.11  
+        #
+        #
+    ### JIMMY IL FAUT CLONE LE DEPOT OU IL Y A TON DOCKER COMPOSE
+    - name: Start service docker, if not started
+      become: yes
+      ansible.builtin.service:
+        name: docker
+        state: started
+
+    - name: enable docker
+      become: yes
+      service:
+        name: docker  
+        enabled: yes
+
+
+    - name: Read-write git checkout from github
+      ansible.builtin.git:
+        repo: https://github.com/Firemontaigu/Docker_mercredi.git
+        dest: /home/jimmy/Docker
+          #    - name : git clone
+          # git:
+          #repo: "https://github.com/Firemontaigu/Docker_mercredi.git"
+          #dst: "~/Docker"
+
+    - name: Run `docker-compose up` again
+      become: yes
+      community.docker.docker_compose:
+        project_src: Docker/
+        file: docker-compose.yml
+        #build: yes
+      register: output 
+
+#  - name: Ensure apache is at the latest version
+#    ansible.builtin.shell:
+#      cmd: date
+#    ansible.builtin.yum:
+#      name: httpd
+#      state: latest
+#  - name: Write the apache config file
+#    ansible.builtin.template:
+#      src: /srv/httpd.j2
+#      dest: /etc/httpd.conf
+
+#- name: Update db servers
+#  hosts: notest
+#  remote_user: jimmy
+
+#  tasks:
+#  - name: Ensure postgresql is at the latest version
+#    ansible.builtin.shell:
+#      command: ping google.com
+#      name: postgresql
+#      state: latest
+#  - name: Ensure that postgresql is started
+#    ansible.builtin.service:
+#      name: postgresql
+#      state: started
+...

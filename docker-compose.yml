@@ -1,1 +1,25 @@
-/etc/ansible/docker-compose.yml
+version: "3.9"
+services:
+    web:
+      build: .
+      ports:
+        - "5004:8080"
+    redis:
+      image: "redis:alpine"
+      #version: '3.9'
+#services:
+  #jenkins:
+       #build: .
+       #image: jenkins
+         #jenkins:latest
+         #container_name: "clode"
+         #Netwworks:
+           # "comsame:
+           #  ipv4_address: "172.18.0.6"
+             #Networks:
+  #comsame:
+    #ipam:
+      #driver: default
+      #config:
+        #        - subnet: "172.18.0.0/16"
+
